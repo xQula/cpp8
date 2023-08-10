@@ -36,15 +36,12 @@ MainWindow::MainWindow(QWidget *parent)
     });
 
     /*
-     * Соединяем сигнал, который передает ответ от БД с методом, который отображает ответ в ПИ
-     */
-     connect(dataBase, &DataBase::sig_SendDataFromDB, this, &MainWindow::ScreenDataFromDB);
-
-    /*
      *  Сигнал для подключения к БД
      */
     connect(dataBase, &DataBase::sig_SendStatusConnection, this, &MainWindow::ReceiveStatusConnectionToDB);
     connect(dataBase, &DataBase::sig_SendStatusRequest, this, &MainWindow::sl_error_handling_to_db);
+    connect(dataBase, &DataBase::sig_SendDataFromDB_all_table, this, &MainWindow::show_the_entire_table);
+    connect(dataBase, &DataBase::sig_SendDataFromDB_query_table, this, &MainWindow::show_the_query_table);
 
     request_genres.emplaceBack("SELECT title, release_year, c.name  FROM film f "
                                "JOIN film_category fc on f.film_id = fc.film_id "
@@ -112,7 +109,16 @@ void MainWindow::on_act_connect_triggered()
 void MainWindow::on_pb_request_clicked()
 {
     ///Тут должен быть код ДЗ
-    dataBase->RequestToDB(request_genres[ui->cb_category->currentIndex()]);
+    if(ui->cb_category->currentIndex() == 0){
+        dataBase->RequestToDB();
+
+    }else if(ui->cb_category->currentIndex() == 1){
+        dataBase->RequestToDB(request_genres[ui->cb_category->currentIndex()]);
+    }else if(ui->cb_category->currentIndex() == 2){
+        dataBase->RequestToDB(request_genres[ui->cb_category->currentIndex()]);
+    }
+
+    //dataBase->RequestToDB(request_genres[ui->cb_category->currentIndex()]);
 }
 
 void MainWindow::sl_error_handling_to_db(QSqlError err)
@@ -125,49 +131,23 @@ void MainWindow::sl_error_handling_to_db(QSqlError err)
     }
 }
 
-/*!
- * \brief Слот отображает значение в QTableWidget
- * \param widget
- * \param typeRequest
- */
-void MainWindow::ScreenDataFromDB(const QTableWidget *widget, int typeRequest)
+void MainWindow::show_the_entire_table( QSqlTableModel *model)
 {
-    ///Тут должен быть код ДЗ
-    switch (typeRequest) {
-
-
-        case requestHorrors:{
-
-        }
-        case requestComedy:{
-
-        }
-        case requestAllFilms:{
-
-            ui->tb_result->setRowCount(widget->rowCount( ));
-            ui->tb_result->setColumnCount(widget->columnCount( ));
-            QStringList hdrs;
-            for(int i = 0; i < widget->columnCount(); ++i){
-                hdrs << widget->horizontalHeaderItem(i)->text();
-            }
-            ui->tb_result->setHorizontalHeaderLabels(hdrs);
-
-            for(int i = 0; i<widget->rowCount(); ++i){
-                for(int j = 0; j<widget->columnCount(); ++j){
-                    ui->tb_result->setItem(i,j, widget->item(i,j)->clone());
-                }
-            }
-
-            ui->tb_result->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-
-            break;
-
-        }
-        default:
-            break;
-        }
-
+    ui->tb_view->setModel(model);
+    ui->tb_view->show();
+    ui->tb_view->update();
+    ui->tb_view->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 }
+
+void MainWindow::show_the_query_table(QSqlQueryModel *model)
+{
+    ui->tb_view->setModel(model);
+    ui->tb_view->show();
+    ui->tb_view->update();
+    ui->tb_view->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+}
+
+
 /*!
  * \brief Метод изменяет стотояние формы в зависимости от статуса подключения к БД
  * \param status
@@ -191,5 +171,8 @@ void MainWindow::ReceiveStatusConnectionToDB(bool status)
 
 }
 
-
+void MainWindow::on_pb_clear_clicked()
+{
+    dataBase->ClearModelTable();
+}
 
