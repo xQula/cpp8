@@ -105,6 +105,7 @@ void DataBase::RequestToDB()
 void DataBase::ClearModelTable()
 {
     table_model_->clear();
+    query_model_->clear();
 }
 /*!
  * @brief Метод возвращает последнюю ошибку БД

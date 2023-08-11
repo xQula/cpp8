@@ -109,6 +109,7 @@ void MainWindow::on_act_connect_triggered()
 void MainWindow::on_pb_request_clicked()
 {
     ///Тут должен быть код ДЗ
+    dataBase->ClearModelTable();
     if(ui->cb_category->currentIndex() == 0){
         dataBase->RequestToDB();
 
@@ -137,6 +138,11 @@ void MainWindow::show_the_entire_table( QSqlTableModel *model)
     ui->tb_view->show();
     ui->tb_view->update();
     ui->tb_view->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    for(int i = 0; i < model->columnCount(); ++i){
+        if(i != 1 && i != 2 ){
+            ui->tb_view->hideColumn(i);
+        }
+    }
 }
 
 void MainWindow::show_the_query_table(QSqlQueryModel *model)
