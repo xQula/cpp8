@@ -74,19 +74,19 @@ void DataBase::RequestToDB(QString request)
 {
     ///Тут должен быть код ДЗ/*
     /// !!Вот тут вопрос, почему-то выводится просто пустое поле, без данных
-//    query_model_->setQuery(request, *dataBase);
-//    QSqlError err;
-//    if(!query_model_->query().exec()){
-//        emit sig_SendStatusRequest(query_model_->lastError());
-//    }
-
-//    emit sig_SendStatusRequest(err);
-    simplieQuery = new QSqlQuery(*dataBase);
+    query_model_->setQuery(request, *dataBase);
     QSqlError err;
-    if(!(simplieQuery->exec(request)))
+    if(!query_model_->query().isActive()){
         emit sig_SendStatusRequest(query_model_->lastError());
-    query_model_->setQuery(std::move(*simplieQuery));
-        emit sig_SendStatusRequest(err);
+    }
+
+    emit sig_SendStatusRequest(err);
+//    simplieQuery = new QSqlQuery(*dataBase);
+//    QSqlError err;
+//    if(!(simplieQuery->exec(request)))
+//        emit sig_SendStatusRequest(query_model_->lastError());
+//    query_model_->setQuery(std::move(*simplieQuery));
+//        emit sig_SendStatusRequest(err);
 }
 
 void DataBase::RequestToDB()
